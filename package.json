@@ -1,0 +1,14 @@
+{
+  "name": "networking-report",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build", // Builds the app before deploying
+    "deploy": "gh-pages -d dist"  // Deploys the 'dist' folder to GitHub Pages
+  },
+  "homepage": "https://LSSE2018.github.io/Networking-Report", // Your live URL
+  "dependencies": { ... },
+  "devDependencies": { ... }
+}
