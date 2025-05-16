@@ -1,52 +1,52 @@
-// src/components/ReportForm.jsx
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { reportSchema, connectionItems, testItems } from '../lib/schema';
-import { SignatureCanvas } from './SignaturePad';
+// src/App.jsx
+import { useState } from 'react';
+import { ReportForm } from './components/ReportForm';
+import { generateReportPDF } from './lib/pdfGenerator';
 
-export function ReportForm({ onSubmit, isSubmitting }) {
-  const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({
-    resolver: zodResolver(reportSchema),
+export function App() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signatures, setSignatures] = useState({
+    customer: null,
+    engineer: null
   });
 
-  // Auto-generate PO code effect
-  useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      if (name === 'reportDate' && value.reportDate) {
-        const date = new Date(value.reportDate);
-        const datePart = `${String(date.getDate()).padStart(2, '0')}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getFullYear()).slice(-2)}`;
-        setValue('poCode', `PO${datePart}SE01`);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch, setValue]);
+  const handleSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const reportData = {
+        ...data,
+        customerSignature: signatures.customer,
+        engineerSignature: signatures.engineer
+      };
+      console.log('Report submitted:', reportData);
+      alert('Report submitted successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Submission failed');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGeneratePDF = () => {
+    // Collect all form data and generate PDF
+    generateReportPDF(formData);
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-8">
-      {/* Basic Information Section */}
-      <BasicInformationSection register={register} errors={errors} />
-      
-      {/* System Connections Section */}
-      <TableSection 
-        title="Position/Location/Type of Connections of the System"
-        items={connectionItems}
-        register={register}
-        remarkField="connectionRemark"
-      />
-      
-      {/* Testing Section */}
-      <TableSection
-        title="Testing & Commissioning of User Experience"
-        items={testItems}
-        register={register}
-        remarkField="testResult"
-      />
-      
-      {/* Signatures Section */}
-      <SignatureSection register={register} errors={errors} />
-      
-      {/* Form Actions */}
-      <FormActions isSubmitting={isSubmitting} />
-    </form>
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <header className="bg-gray-900 text-white px-6 py-4">
+          <h1 className="text-2xl font-bold">Smart Networking Report</h1>
+          <p className="font-semibold">LAXMI SECURITY SYSTEMS AND ELECTRICALS</p>
+        </header>
+        
+        <ReportForm 
+          onSubmit={handleSubmit} 
+          isSubmitting={isSubmitting}
+          onGeneratePDF={handleGeneratePDF}
+        />
+      </div>
+    </div>
   );
 }
